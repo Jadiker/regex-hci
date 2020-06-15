@@ -1,0 +1,47 @@
+'''
+6/14/2020
+
+Alright, so I've got the Lark Parser working and it works wonderfully (I'm almost wondering if I should use it in the instruction follower, but that's a different matter.)
+
+So the next thing to do is to try to figure out how to convert it into a regex.
+
+It doesn't seem too hard.
+
+character classes can always be done with [].
+`StartsWith` just puts it at the start.
+`EndsWith` just puts it at the end.
+`Contains` is usually just `.*x.*`
+`Not` is a negative lookahead.
+`Optional` is `?`.
+`KleeneStar` is `*`
+`Concat` you literally just put them next to each other.
+`Or` is `|`.
+`And` I don't understand.
+`Repeat` is just literally `concat` K times.
+`Repeat` at least is `concat` K times followed by `KleeneStar`.
+`RepeatRange` is just `or`s of `concat`s from k1 to k2.
+
+I really don't think that this is too bad.
+And with the Lark parser, I should be fine.
+
+Now I just need a few examples to test it on.
+'''
+
+'''
+6/15/2020
+
+Looks like you use two lookaheads for the `And` operator:
+    https://stackoverflow.com/questions/3041320/regex-and-operator
+
+Yup, here's confirmation:
+    https://stackoverflow.com/questions/469913/regular-expressions-is-there-an-and-operator
+
+Great!
+So I think I can do the conversion now!
+Let's get the syntax up and running and then we'll work on it!
+
+Here's what's available in the common package of lark:
+    https://github.com/lark-parser/lark/blob/master/lark/grammars/common.lark
+
+Next I need to learn how to navigate the tree.
+'''
