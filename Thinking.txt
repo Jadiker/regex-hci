@@ -44,4 +44,7 @@ Here's what's available in the common package of lark:
     https://github.com/lark-parser/lark/blob/master/lark/grammars/common.lark
 
 Next I need to learn how to navigate the tree.
+
+
+The "sep" operator is also in there.
 '''
