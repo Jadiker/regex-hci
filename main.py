@@ -25,9 +25,9 @@ parser = Lark('''
        | number
        | letter
 
-    k : INT
-    number: "<" INT ">"
-    letter: "<" LETTER ">"
+    k                     : INT
+    number                : "<" INT ">"
+    letter                : "<" LETTER ">"
     number_class          : "<num>"
     non_zero_number_class : "<num1-9>"
     letter_class          : "<let>"
