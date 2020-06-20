@@ -50,17 +50,17 @@ parser = Lark('''
     %import common.LETTER
 ''')
 
-# INPUT_STRING = "or(contain(<2>),<let>)"
-# INPUT_STRING = "concat(repeatatleast(<let>,1),<C>)"
-INPUT_STRING = "endwith(endwith(<num1-9>))"
 
-parse_tree = parser.parse(INPUT_STRING)
-# print(parse_tree.pretty())
+def tree_to_regex(tree, bounded=False):
+    '''
+    Takes a Lark parsing tree of the DSL and returns an equivalent regex string.
 
-# if bounded is True, will ensure that the entire regex is encompassed in such a way that adding an operation will apply the operation to the entire regex.
-# for example, `abc` is not bounded because the `*` in `abc*` would only operate on the `c`.
-# however, `(?:abc)` is bounded because `(?:abc)*` would operate on all of `abc`
-def construct_regex(tree, bounded=False):
+    If bounded is True, will ensure that the entire regex is encompassed in such a way
+    ...that adding an operation will apply the operation to the entire regex.
+    For example, `abc` is not bounded because the `*` in `abc*` would only operate on the `c`.
+    However, `(?:abc)` is bounded because the `*` in `(?:abc)*` would operate on all of `abc`.
+    '''
+
     def bound(regex):
         '''Puts bounds on the regex if bounded is true'''
         return f"(?:{regex})" if bounded else regex
@@ -68,7 +68,7 @@ def construct_regex(tree, bounded=False):
     operation = tree.data
 
     if operation == "k":
-        raise ValueError("k should never be an operation - something is wrong with the code - an earlier function should have just grabbed the value, not called `construct_regex` on a 'k' operation.")
+        raise ValueError("k should never be an operation - something is wrong with the code - an earlier function should have just grabbed the value, not called `tree_to_regex` on a 'k' operation.")
 
     if operation == "number":
         # turn the number Token into a string
@@ -100,41 +100,41 @@ def construct_regex(tree, bounded=False):
         return "[0-9a-zA-Z]"
 
     if operation == "start":
-        return construct_regex(tree.children[0], bounded=bounded)
+        return tree_to_regex(tree.children[0], bounded=bounded)
 
     if operation == "start_with":
-        regex = construct_regex(tree.children[0], bounded=False)
+        regex = tree_to_regex(tree.children[0], bounded=False)
         regex = regex + ".*"
         return bound(regex)
 
     if operation == "end_with":
-        regex = construct_regex(tree.children[0], bounded=False)
+        regex = tree_to_regex(tree.children[0], bounded=False)
         regex = ".*" + regex
         return bound(regex)
 
     if operation == "contain":
-        regex = construct_regex(tree.children[0], bounded=False)
+        regex = tree_to_regex(tree.children[0], bounded=False)
         regex = ".*" + regex + ".*"
         return bound(regex)
 
     if operation == "concat":
         child1, child2 = tree.children
-        regex = construct_regex(child1, bounded=False) + construct_regex(child2, bounded=False)
+        regex = tree_to_regex(child1, bounded=False) + tree_to_regex(child2, bounded=False)
         return bound(regex)
 
     if operation == "or":
         child1, child2 = tree.children
-        regex = construct_regex(child1, bounded=True) + "|" + construct_regex(child2, bounded=True)
+        regex = tree_to_regex(child1, bounded=True) + "|" + tree_to_regex(child2, bounded=True)
         return bound(regex)
 
     if operation == "and":
         child1, child2 = tree.children
-        regex = f"(?={construct_regex(child1, bounded=False)})(?={construct_regex(child2, bounded=False)})"
+        regex = f"(?={tree_to_regex(child1, bounded=False)})(?={tree_to_regex(child2, bounded=False)})"
         return bound(regex)
 
     if operation == "repeat":
         r_tree, k_tree = tree.children
-        repeatable_regex = construct_regex(r_tree, bounded=False)
+        repeatable_regex = tree_to_regex(r_tree, bounded=False)
         # k's child will be a token that we can convert to a string.
         amount = int(str(k_tree.children[0]))
         # repeat the regex the given amount of times and then make any more repetitions optional
@@ -143,8 +143,8 @@ def construct_regex(tree, bounded=False):
 
     if operation == "repeat_at_least":
         r_tree, k_tree = tree.children
-        repeatable_regex = construct_regex(r_tree, bounded=False)
-        operationable_regex = construct_regex(r_tree, bounded=True)
+        repeatable_regex = tree_to_regex(r_tree, bounded=False)
+        operationable_regex = tree_to_regex(r_tree, bounded=True)
         # k's child will be a token that we can convert to a string.
         amount = int(str(k_tree.children[0]))
         if amount == 0:
@@ -159,7 +159,7 @@ def construct_regex(tree, bounded=False):
 
     if operation == "repeat_range":
         r_tree, k1_tree, k2_tree = tree.children
-        repeatable_regex = construct_regex(r_tree, bounded=False)
+        repeatable_regex = tree_to_regex(r_tree, bounded=False)
         # k's child will be a token that we can convert to a string.
         start = int(str(k1_tree.children[0]))
         end = int(str(k2_tree.children[0]))
@@ -179,13 +179,21 @@ def construct_regex(tree, bounded=False):
 
         return bound(regex)
 
-
-
         # repeat the regex the given amount of times and then make any more repetitions optional
         regex = (repeatable_regex * amount) + f"{operationable_regex}*"
         return bound(regex)
 
-    print(f"Didn't know what to do for:\n{operation}\n(Putting in a '<something>')")
-    return "<something>"
+    raise ValueError(f"Didn't know what to do for operation '{operation}'")
 
-print(construct_regex(parse_tree))
+def construct_regex(dsl: str) -> str:
+    '''Takes a string in the DSL and converts it to regex'''
+    tree = parser.parse(dsl)
+    return tree_to_regex(tree)
+
+
+if __name__ == "__main__":
+    INPUT_STRING = "or(contain(<2>),<let>)"
+    # INPUT_STRING = "concat(repeatatleast(<let>,1),<C>)"
+    # INPUT_STRING = "endwith(endwith(<num1-9>))"
+
+    print(construct_regex(INPUT_STRING))
