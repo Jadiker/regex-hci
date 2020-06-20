@@ -5,8 +5,8 @@ parser = Lark('''
     start : r
 
     ?r : c?
-       | starts_with
-       | ends_with
+       | start_with
+       | end_with
        | contain
        | concat
        | or
@@ -36,8 +36,8 @@ parser = Lark('''
     any_class             : "<any>"
     alphanumerical_class  : "<alphanum>"
 
-    starts_with     : "startswith(" r ")"
-    ends_with       : "endswith(" r ")"
+    start_with      : "startwith(" r ")"
+    end_with       : "endwith(" r ")"
     contain         : "contain(" r ")"
     concat          : "concat(" r "," r ")"
     or              : "or(" r "," r ")"
@@ -50,8 +50,9 @@ parser = Lark('''
     %import common.LETTER
 ''')
 
-INPUT_STRING = "or(contain(<2>),<let>)"
+# INPUT_STRING = "or(contain(<2>),<let>)"
 # INPUT_STRING = "concat(repeatatleast(<let>,1),<C>)"
+INPUT_STRING = "endwith(endwith(<num1-9>))"
 
 parse_tree = parser.parse(INPUT_STRING)
 # print(parse_tree.pretty())
@@ -101,12 +102,12 @@ def construct_regex(tree, bounded=False):
     if operation == "start":
         return construct_regex(tree.children[0], bounded=bounded)
 
-    if operation == "starts_with":
+    if operation == "start_with":
         regex = construct_regex(tree.children[0], bounded=False)
         regex = regex + ".*"
         return bound(regex)
 
-    if operation == "ends_with":
+    if operation == "end_with":
         regex = construct_regex(tree.children[0], bounded=False)
         regex = ".*" + regex
         return bound(regex)
