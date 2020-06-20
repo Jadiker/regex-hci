@@ -156,7 +156,6 @@ def tree_to_regex(tree, bounded=False):
             regex = (repeatable_regex * amount) + f"{operationable_regex}*"
         return bound(regex)
 
-
     if operation == "repeat_range":
         r_tree, k1_tree, k2_tree = tree.children
         repeatable_regex = tree_to_regex(r_tree, bounded=False)
