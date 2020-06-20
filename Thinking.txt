@@ -58,4 +58,13 @@ Is `and(startswith(<A>), endswith(<B>))` a valid expression?
 
 Yeah. But I don't think they work too differently.
 I think if you just replace it with `.*` I think it will be fine.
+
+I don't have "<sep>" yet, but I don't understand it from the link I was given and I also don't see how it's used in any of the examples in the spreadsheet.
+
+Here's the link I was given:
+    https://github.com/utopia-group/regel/blob/a8660915cccfd0356ce07b50afd2aebae211f77e/resnax/src/resnax/synthesizer/SketchProgram.java#L58
+
+I also don't have "not" or "optional" from above, which is what was in the original paper.
+The "not" operator is tricky because for character classes you usually do `[^a-zA-Z]` for "not(<let>)" rather than `(?![a-zA-Z])`.
+So it will be tricky to make it look natural. It will still work, though.
 '''
