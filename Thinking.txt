@@ -48,3 +48,14 @@ Next I need to learn how to navigate the tree.
 
 The "sep" operator is also in there.
 '''
+
+'''
+6/19/2020
+
+Okay, so I think `startswith` and `endswith` work differently than I previously thought.
+
+Is `and(startswith(<A>), endswith(<B>))` a valid expression?
+
+Yeah. But I don't think they work too differently.
+I think if you just replace it with `.*` I think it will be fine.
+'''
