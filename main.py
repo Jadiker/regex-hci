@@ -37,7 +37,7 @@ parser = Lark('''
     alphanumerical_class  : "<alphanum>"
 
     start_with      : "startwith(" r ")"
-    end_with       : "endwith(" r ")"
+    end_with        : "endwith(" r ")"
     contain         : "contain(" r ")"
     concat          : "concat(" r "," r ")"
     or              : "or(" r "," r ")"
