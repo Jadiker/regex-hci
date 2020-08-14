@@ -14,6 +14,8 @@ parser = Lark('''
        | repeat
        | repeat_at_least
        | repeat_range
+       | not
+       | notcc
 
     ?c : number_class
        | non_zero_number_class
@@ -22,7 +24,7 @@ parser = Lark('''
        | uppercase_class
        | any_class
        | alphanumerical_class
-       | single_symbol_class
+       | single_character_class
 
     k       : INT
     integer : INT
@@ -30,16 +32,16 @@ parser = Lark('''
     // a symbol is any non-space single character
     symbol  : /\S/
 
-    single_symbol_class   : "<" integer ">"
-                          | "<" letter ">"
-                          | "<" symbol ">"
-    number_class          : "<num>"
-    non_zero_number_class : "<num1-9>"
-    letter_class          : "<let>"
-    lowercase_class       : "<low>"
-    uppercase_class       : "<cap>"
-    any_class             : "<any>"
-    alphanumerical_class  : "<alphanum>"
+    single_character_class   : "<" integer ">"
+                             | "<" letter ">"
+                             | "<" symbol ">"
+    number_class             : "<num>"
+    non_zero_number_class    : "<num1-9>"
+    letter_class             : "<let>"
+    lowercase_class          : "<low>"
+    uppercase_class          : "<cap>"
+    any_class                : "<any>"
+    alphanumerical_class     : "<alphanum>"
 
 
     start_with      : "startwith(" r ")"
@@ -51,6 +53,8 @@ parser = Lark('''
     repeat          : "repeat(" r "," k ")"
     repeat_at_least : "repeatatleast(" r "," k ")"
     repeat_range    : "repeatrange(" r "," k "," k ")"
+    not             : "not(" r ")"
+    notcc           : "notcc(" single_character_class ")"
 
     %import common.INT
     %import common.LETTER
@@ -75,14 +79,14 @@ def tree_to_regex(tree, bounded=False):
 
     assert operation != "k", "k should never be an operation - something is wrong with the code - an earlier function should have just grabbed the value, not called `tree_to_regex` on a 'k' operation."
 
-    if operation == "single_symbol_class":
-        # get the single symbol as a string
-        symbol = str(tree.children[0].children[0])
-        symbol_type = tree.children[0].data
-        if symbol_type == "symbol":
-            return "\\" + symbol
+    if operation == "single_character_class":
+        # get the single character as a string
+        character = str(tree.children[0].children[0])
+        character_type = tree.children[0].data
+        if character_type == "symbol":
+            return "\\" + character
         else:
-            return symbol
+            return character
 
     if operation == "number_class":
         return "[0-9]"
@@ -188,7 +192,12 @@ def tree_to_regex(tree, bounded=False):
         regex = (repeatable_regex * amount) + f"{operationable_regex}*"
         return bound(regex)
 
-    raise ValueError(f"Didn't know what to do for operation '{operation}'")
+    if operation == "not":
+        regex = tree_to_regex(tree.children[0], bounded=False)
+        regex = f"(?!{regex}).*"
+        return bound(regex)
+
+    raise ValueError(f"The operation '{operation}' is not supported at this time")
 
 def construct_regex(dsl: str) -> str:
     '''Takes a string in the DSL and converts it to regex'''

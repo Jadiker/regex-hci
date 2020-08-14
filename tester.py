@@ -84,7 +84,7 @@ def test_regex_synthesizer(synthesizer: Callable[[Dsl], Regex], cases_file_name:
 
 if __name__ == "__main__":
     from regex_synthesizer import construct_regex
-    CASES_FILE = "edited_test_cases.txt"
+    CASES_FILE = "new_edited_test_cases.txt"
     test_results = test_regex_synthesizer(construct_regex, CASES_FILE)
     success_total = 0
     failure_total = 0
