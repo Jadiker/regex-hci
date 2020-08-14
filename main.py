@@ -22,12 +22,17 @@ parser = Lark('''
        | uppercase_class
        | any_class
        | alphanumerical_class
-       | number
-       | letter
+       | single_symbol_class
 
-    k                     : INT
-    number                : "<" INT ">"
-    letter                : "<" LETTER ">"
+    k       : INT
+    integer : INT
+    letter  : LETTER
+    // a symbol is any non-space single character
+    symbol  : /\S/
+
+    single_symbol_class   : "<" integer ">"
+                          | "<" letter ">"
+                          | "<" symbol ">"
     number_class          : "<num>"
     non_zero_number_class : "<num1-9>"
     letter_class          : "<let>"
@@ -35,6 +40,7 @@ parser = Lark('''
     uppercase_class       : "<cap>"
     any_class             : "<any>"
     alphanumerical_class  : "<alphanum>"
+
 
     start_with      : "startwith(" r ")"
     end_with        : "endwith(" r ")"
@@ -70,13 +76,16 @@ def tree_to_regex(tree, bounded=False):
     if operation == "k":
         raise ValueError("k should never be an operation - something is wrong with the code - an earlier function should have just grabbed the value, not called `tree_to_regex` on a 'k' operation.")
 
-    if operation == "number":
-        # turn the number Token into a string
-        return str(tree.children[0])
+    if operation == "single_symbol_class":
+        # get the single symbol as a string
+        symbol = str(tree.children[0].children[0])
+        symbol_type = tree.children[0].data
+        print(symbol_type)
 
-    if operation == "letter":
-        # turn the letter Token into a string
-        return str(tree.children[0])
+        if symbol_type == "symbol":
+            return "\\" + symbol
+        else:
+            return symbol
 
     if operation == "number_class":
         return "[0-9]"
@@ -191,8 +200,16 @@ def construct_regex(dsl: str) -> str:
 
 
 if __name__ == "__main__":
-    INPUT_STRING = "or(contain(<2>),<let>)"
+    # INPUT_STRING = "or(contain(<2>),<let>)"
     # INPUT_STRING = "concat(repeatatleast(<let>,1),<C>)"
     # INPUT_STRING = "endwith(endwith(<num1-9>))"
+    # INPUT_STRING = "contain(repeatrange(<num1-9>,3,4))"
+
+    # These test the new functionality
+    # INPUT_STRING = "concat(repeatatleast(<let>,1),<?>)"
+    # INPUT_STRING = "concat(repeatatleast(<let>,1),<.>)"
+    # INPUT_STRING = "concat(repeatatleast(<let>,1),<\>)"
+    # INPUT_STRING = "or(endwith(<num>),<.>)"
+    INPUT_STRING = "or(endwith(<num>),<\>)"
 
     print(construct_regex(INPUT_STRING))

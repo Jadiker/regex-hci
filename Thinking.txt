@@ -68,3 +68,9 @@ I also don't have "not" or "optional" from above, which is what was in the origi
 The "not" operator is tricky because for character classes you usually do `[^a-zA-Z]` for "not(<let>)" rather than `(?![a-zA-Z])`.
 So it will be tricky to make it look natural. It will still work, though.
 '''
+
+'''
+8/14/2020
+
+Here's the online IDE for Lark: https://lark-parser.github.io/lark/ide/app.html
+'''
