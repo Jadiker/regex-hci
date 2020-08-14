@@ -73,4 +73,6 @@ So it will be tricky to make it look natural. It will still work, though.
 8/14/2020
 
 Here's the online IDE for Lark: https://lark-parser.github.io/lark/ide/app.html
+
+Turns out that OR needs to be bounded because '[0-9]|\+[0-9]|\+' can match just a single digit. It's supposed to be '([0-9]|\+)([0-9]|\+)'.
 '''

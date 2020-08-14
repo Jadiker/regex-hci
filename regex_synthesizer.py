@@ -67,21 +67,18 @@ def tree_to_regex(tree, bounded=False):
     However, `(?:abc)` is bounded because the `*` in `(?:abc)*` would operate on all of `abc`.
     '''
 
-    def bound(regex):
+    def bound(regex, override=False):
         '''Puts bounds on the regex if bounded is true'''
-        return f"(?:{regex})" if bounded else regex
+        return f"(?:{regex})" if bounded or override else regex
 
     operation = tree.data
 
-    if operation == "k":
-        raise ValueError("k should never be an operation - something is wrong with the code - an earlier function should have just grabbed the value, not called `tree_to_regex` on a 'k' operation.")
+    assert operation != "k", "k should never be an operation - something is wrong with the code - an earlier function should have just grabbed the value, not called `tree_to_regex` on a 'k' operation."
 
     if operation == "single_symbol_class":
         # get the single symbol as a string
         symbol = str(tree.children[0].children[0])
         symbol_type = tree.children[0].data
-        print(symbol_type)
-
         if symbol_type == "symbol":
             return "\\" + symbol
         else:
@@ -134,7 +131,7 @@ def tree_to_regex(tree, bounded=False):
     if operation == "or":
         child1, child2 = tree.children
         regex = tree_to_regex(child1, bounded=True) + "|" + tree_to_regex(child2, bounded=True)
-        return bound(regex)
+        return bound(regex, override=True)
 
     if operation == "and":
         child1, child2 = tree.children
