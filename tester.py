@@ -40,6 +40,9 @@ def test_regex(r: Regex, examples: Examples):
                 success_cases.append(example)
             else:
                 failure_cases.append(example)
+            # TODO delete
+            if example == '|(E,3':
+                print(f"Should match is {should_match} for the example '{example}'")
     return success_cases, failure_cases
 
 
